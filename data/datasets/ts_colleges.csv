@@ -1,0 +1,11 @@
+name,short_name,college_type,state,city,address,nirf_rank,nirf_score,nirf_year,naac_grade,annual_fees_min,annual_fees_max,placement_percentage,avg_package_lpa,highest_package_lpa,hostel_available,boys_hostel,girls_hostel,affiliated_university,autonomous,official_website,branches,facilities,top_recruiters,description,total_seats
+
+Chaitanya Bharathi Institute of Technology,CBIT,Private,Telangana,Hyderabad,Gandipet Hyderabad,75,54.12,2024,A++,140000,180000,89,8,20,Yes,Yes,Yes,Osmania University,Yes,https://www.cbit.ac.in,"CSE,AI,DS,ECE,EEE","Library,Hostel,Sports","TCS,Infosys,Amazon","Top Hyderabad engineering college",2800
+
+Vasavi College of Engineering,Vasavi,Private,Telangana,Hyderabad,Ibrahimbagh Hyderabad,82,52.30,2024,A++,135000,175000,88,7,18,Yes,Yes,Yes,Osmania University,Yes,https://www.vce.ac.in,"CSE,ECE,EEE,ME","Library,Hostel,WiFi","Infosys,TCS,Adobe","Highly reputed Hyderabad college",2500
+
+Malla Reddy Engineering College,MREC,Private,Telangana,Hyderabad,Kompally Hyderabad,140,42.10,2024,A+,110000,150000,78,5,11,Yes,Yes,Yes,JNTUH,Yes,https://www.mallareddyecw.com,"CSE,AI,DS,ECE","Library,Hostel,Sports","Wipro,TCS,Infosys","Popular TS engineering institution",3000
+
+Gokaraju Rangaraju Institute of Engineering and Technology,GRIET,Private,Telangana,Hyderabad,Bachupally Hyderabad,90,50.20,2024,A++,125000,165000,86,7,16,Yes,Yes,Yes,JNTUH,Yes,https://www.griet.ac.in,"CSE,AI,ECE,EEE","Library,Hostel,WiFi","Infosys,TCS,Amazon","Strong placements in Hyderabad",2600
+
+VNR Vignana Jyothi Institute of Engineering and Technology,VNRVJIET,Private,Telangana,Hyderabad,Bachupally Hyderabad,68,56.10,2024,A++,145000,190000,91,9,24,Yes,Yes,Yes,JNTUH,Yes,https://vnrvjiet.ac.in,"CSE,AI,DS,ECE","Library,Hostel,Sports","Google,Amazon,Adobe","Top Telangana engineering college",2400

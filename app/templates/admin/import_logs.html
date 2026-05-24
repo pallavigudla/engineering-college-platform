@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Import History{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-lg-2 d-none d-lg-block">
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-brand"><i class="bi bi-speedometer2 me-2"></i>Admin</div>
+        <nav class="admin-nav">
+          <a class="admin-nav-link" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
+          <a class="admin-nav-link" href="{{ url_for('admin.users') }}"><i class="bi bi-people"></i><span>Users</span></a>
+          <a class="admin-nav-link" href="{{ url_for('admin.import_data') }}"><i class="bi bi-cloud-upload"></i><span>Import Data</span></a>
+          <a class="admin-nav-link active" href="{{ url_for('admin.import_logs') }}"><i class="bi bi-journal-text"></i><span>Import Logs</span></a>
+          <hr class="my-2 opacity-25">
+          <a class="admin-nav-link" href="{{ url_for('main.index') }}"><i class="bi bi-house"></i><span>View Site</span></a>
+          <a class="admin-nav-link text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i><span>Logout</span></a>
+        </nav>
+      </div>
+    </div>
+    <div class="col-lg-10">
+      <div class="admin-page-header mb-4">
+        <h1 class="admin-page-title">Import History</h1>
+        <p class="text-muted">Full CSV import log</p>
+      </div>
+      <div class="admin-card">
+        <div class="admin-card-body p-0">
+          <div class="table-responsive">
+            <table class="table edu-table mb-0">
+              <thead>
+                <tr><th>File</th><th>Source</th><th>Total</th><th>Added</th><th>Updated</th><th>Failed</th><th>Status</th><th>Started</th><th>Completed</th></tr>
+              </thead>
+              <tbody>
+                {% for log in logs.items %}
+                <tr>
+                  <td class="small font-monospace">{{ log.filename }}</td>
+                  <td><span class="badge bg-primary-subtle text-primary">{{ log.source }}</span></td>
+                  <td>{{ log.records_total }}</td>
+                  <td class="text-success">{{ log.records_added }}</td>
+                  <td class="text-primary">{{ log.records_updated }}</td>
+                  <td class="{{ 'text-danger' if log.records_failed > 0 else 'text-muted' }}">{{ log.records_failed }}</td>
+                  <td>
+                    <span class="badge {{ 'bg-success-subtle text-success' if log.status == 'success' else 'bg-danger-subtle text-danger' if log.status == 'failed' else 'bg-warning-subtle text-warning' }}">
+                      {{ log.status | title }}
+                    </span>
+                  </td>
+                  <td class="text-muted small">{{ log.started_at.strftime('%d %b %Y %H:%M') }}</td>
+                  <td class="text-muted small">{{ log.completed_at.strftime('%H:%M') if log.completed_at else '—' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="9" class="text-center text-muted py-4">No import logs yet</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% if logs.pages > 1 %}
+      <nav class="mt-4">
+        <ul class="pagination edu-pagination justify-content-center">
+          {% for pn in logs.iter_pages() %}
+            {% if pn %}
+            <li class="page-item {{ 'active' if pn == logs.page }}">
+              <a class="page-link" href="{{ url_for('admin.import_logs', page=pn) }}">{{ pn }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

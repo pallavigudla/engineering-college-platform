@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+
+    <!-- Sidebar -->
+    <div class="col-lg-2 d-none d-lg-block">
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-brand">
+          <i class="bi bi-speedometer2 me-2"></i>Admin
+        </div>
+        <nav class="admin-nav">
+          <a class="admin-nav-link active" href="{{ url_for('admin.dashboard') }}">
+            <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+          </a>
+          <a class="admin-nav-link" href="{{ url_for('admin.users') }}">
+            <i class="bi bi-people"></i><span>Users</span>
+          </a>
+          <a class="admin-nav-link" href="{{ url_for('admin.import_data') }}">
+            <i class="bi bi-cloud-upload"></i><span>Import Data</span>
+          </a>
+          <a class="admin-nav-link" href="{{ url_for('admin.import_logs') }}">
+            <i class="bi bi-journal-text"></i><span>Import Logs</span>
+          </a>
+          <a class="admin-nav-link" href="{{ url_for('colleges.search') }}">
+            <i class="bi bi-building"></i><span>Browse Colleges</span>
+          </a>
+          <hr class="my-2 opacity-25">
+          <a class="admin-nav-link" href="{{ url_for('main.index') }}">
+            <i class="bi bi-house"></i><span>View Site</span>
+          </a>
+          <a class="admin-nav-link text-danger" href="{{ url_for('auth.logout') }}">
+            <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-10">
+      <div class="admin-page-header mb-4">
+        <h1 class="admin-page-title">Analytics Dashboard</h1>
+        <p class="text-muted mb-0">Platform overview and data management</p>
+      </div>
+
+      <!-- Key Metric Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+          <div class="admin-metric-card">
+            <div class="admin-metric-icon bg-primary-subtle text-primary">
+              <i class="bi bi-building"></i>
+            </div>
+            <div class="admin-metric-num">{{ total_colleges }}</div>
+            <div class="admin-metric-label">Total Colleges</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="admin-metric-card">
+            <div class="admin-metric-icon bg-success-subtle text-success">
+              <i class="bi bi-people"></i>
+            </div>
+            <div class="admin-metric-num">{{ total_users }}</div>
+            <div class="admin-metric-label">Registered Students</div>
+            <div class="admin-metric-delta">+{{ new_users_30d }} this month</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="admin-metric-card">
+            <div class="admin-metric-icon bg-danger-subtle text-danger">
+              <i class="bi bi-heart-fill"></i>
+            </div>
+            <div class="admin-metric-num">{{ total_favorites }}</div>
+            <div class="admin-metric-label">Total Favorites</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="admin-metric-card">
+            <div class="admin-metric-icon bg-warning-subtle text-warning">
+              <i class="bi bi-cloud-upload"></i>
+            </div>
+            <div class="admin-metric-num">{{ total_imports }}</div>
+            <div class="admin-metric-label">Dataset Imports</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+
+        <!-- Colleges by State Chart -->
+        <div class="col-lg-8">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h5 class="admin-card-title"><i class="bi bi-bar-chart me-2"></i>Colleges by State</h5>
+            </div>
+            <div class="admin-card-body">
+              <canvas id="collegesByStateChart" height="280"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Imports -->
+        <div class="col-lg-4">
+          <div class="admin-card h-100">
+            <div class="admin-card-header">
+              <h5 class="admin-card-title"><i class="bi bi-clock-history me-2"></i>Recent Imports</h5>
+              <a href="{{ url_for('admin.import_data') }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus me-1"></i>Import
+              </a>
+            </div>
+            <div class="admin-card-body p-0">
+              {% for log in recent_imports %}
+              <div class="import-log-item">
+                <div class="import-log-icon {{ 'text-success' if log.status == 'success' else 'text-danger' if log.status == 'failed' else 'text-warning' }}">
+                  <i class="bi bi-{{ 'check-circle-fill' if log.status == 'success' else 'x-circle-fill' if log.status == 'failed' else 'clock' }}"></i>
+                </div>
+                <div class="import-log-info">
+                  <div class="import-log-name">{{ log.source }} · {{ log.filename[:20] }}...</div>
+                  <div class="import-log-meta">
+                    {{ log.records_added }} added · {{ log.records_updated }} updated
+                    · {{ log.started_at.strftime('%d %b %H:%M') }}
+                  </div>
+                </div>
+              </div>
+              {% else %}
+              <div class="text-center text-muted py-4">
+                <i class="bi bi-inbox fs-3 d-block mb-2"></i>No imports yet
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Users -->
+        <div class="col-12">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h5 class="admin-card-title"><i class="bi bi-people me-2"></i>Recent Registrations</h5>
+              <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="admin-card-body p-0">
+              <div class="table-responsive">
+                <table class="table edu-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>Name</th><th>Email</th><th>Joined</th><th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="user-avatar-xs">{{ user.full_name[0].upper() }}</div>
+                          {{ user.full_name }}
+                        </div>
+                      </td>
+                      <td class="text-muted">{{ user.email }}</td>
+                      <td class="text-muted">{{ user.created_at.strftime('%d %b %Y') }}</td>
+                      <td>
+                        <span class="badge {{ 'bg-success-subtle text-success' if user.is_active else 'bg-danger-subtle text-danger' }}">
+                          {{ 'Active' if user.is_active else 'Inactive' }}
+                        </span>
+                      </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center text-muted py-3">No users yet</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Fetch and render colleges by state chart
+fetch("{{ url_for('admin.analytics_colleges_by_state') }}")
+  .then(r => r.json())
+  .then(data => {
+    const ctx = document.getElementById('collegesByStateChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          label: 'Number of Colleges',
+          data: data.values,
+          backgroundColor: 'rgba(79, 70, 229, 0.75)',
+          borderColor: 'rgba(79, 70, 229, 1)',
+          borderWidth: 1,
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  })
+  .catch(e => console.error('Chart load error:', e));
+</script>
+{% endblock %}

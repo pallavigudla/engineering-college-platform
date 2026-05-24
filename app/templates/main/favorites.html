@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}My Favorites{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <h1 class="page-title mb-1">My Favorite Colleges</h1>
+      <p class="text-muted mb-0">{{ favorites | length }} college{{ 's' if favorites | length != 1 }} saved</p>
+    </div>
+    <a href="{{ url_for('colleges.search') }}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-search me-1"></i>Find More Colleges
+    </a>
+  </div>
+
+  {% if favorites %}
+  <div class="row g-4">
+    {% set fav_ids = favorites | map(attribute='college_id') | list | set %}
+    {% for fav in favorites %}
+    <div class="col-sm-6 col-lg-4">
+      {% set college = fav.college %}
+      {% include "colleges/_college_card.html" %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Compare Selected Button -->
+  <div id="compareTrayFixed" class="compare-tray-fixed d-none">
+    <div class="container d-flex align-items-center justify-content-between gap-3">
+      <span id="compareTrayLabel" class="text-white fw-semibold">0 colleges selected</span>
+      <a id="compareTrayBtn" href="#" class="btn btn-white btn-sm">
+        <i class="bi bi-layout-split me-1"></i>Compare Now
+      </a>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state text-center py-5 my-4">
+    <div class="empty-icon mb-3"><i class="bi bi-heart"></i></div>
+    <h4 class="empty-title">No favorites yet</h4>
+    <p class="empty-desc">Click the <i class="bi bi-heart"></i> icon on any college to save it here.</p>
+    <a href="{{ url_for('colleges.search') }}" class="btn btn-primary mt-3">
+      <i class="bi bi-search me-2"></i>Explore Colleges
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

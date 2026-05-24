@@ -1,0 +1,11 @@
+name,short_name,college_type,state,city,address,nirf_rank,nirf_score,nirf_year,naac_grade,annual_fees_min,annual_fees_max,placement_percentage,avg_package_lpa,highest_package_lpa,hostel_available,boys_hostel,girls_hostel,affiliated_university,autonomous,official_website,branches,facilities,top_recruiters,description,total_seats
+
+National Institute of Technology Tiruchirappalli,NIT Trichy,Govt,Tamil Nadu,Tiruchirappalli,Tiruchirappalli Tamil Nadu,9,78.11,2024,A++,65000,180000,92,14,40,Yes,Yes,Yes,NIT System,Yes,https://www.nitt.edu,"CSE,ECE,ME,EEE","Library,Hostel,Sports","TCS,Infosys,Amazon","Top NIT",1300
+
+National Institute of Technology Karnataka,NIT Surathkal,Govt,Karnataka,Mangalore,Surathkal Karnataka,12,75.90,2024,A++,68000,185000,91,15,38,Yes,Yes,Yes,NIT System,Yes,https://www.nitk.ac.in,"CSE,ECE,ME,EEE","Library,Hostel,Sports","Infosys,Oracle,Amazon","Premier coastal NIT",1200
+
+National Institute of Technology Warangal,NIT Warangal,Govt,Telangana,Warangal,Warangal Telangana,15,74.22,2024,A++,67000,182000,90,13,36,Yes,Yes,Yes,NIT System,Yes,https://www.nitw.ac.in,"CSE,ECE,ME,EEE","Library,Hostel,WiFi","TCS,Adobe,Microsoft","Top Telangana NIT",1250
+
+National Institute of Technology Calicut,NIT Calicut,Govt,Kerala,Calicut,Calicut Kerala,18,72.45,2024,A++,66000,178000,89,12,34,Yes,Yes,Yes,NIT System,Yes,https://www.nitc.ac.in,"CSE,ECE,ME,CE","Library,Hostel,Sports","Infosys,TCS,Wipro","Leading Kerala NIT",1180
+
+National Institute of Technology Rourkela,NIT Rourkela,Govt,Odisha,Rourkela,Rourkela Odisha,20,71.88,2024,A++,64000,176000,88,11,32,Yes,Yes,Yes,NIT System,Yes,https://www.nitrkl.ac.in,"CSE,ECE,ME,CE","Library,Hostel,Sports","Amazon,TCS,Oracle","Top Odisha NIT",1220

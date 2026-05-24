@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Dashboard Header -->
+  <div class="dashboard-header mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <div class="user-avatar-lg">{{ current_user.full_name[0].upper() }}</div>
+      <div>
+        <h1 class="dashboard-title mb-0">Welcome, {{ current_user.full_name.split()[0] }}!</h1>
+        <p class="text-muted mb-0">{{ current_user.email }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="dash-stat-card">
+        <div class="dash-stat-icon text-danger"><i class="bi bi-heart-fill"></i></div>
+        <div class="dash-stat-num">{{ fav_colleges | length }}</div>
+        <div class="dash-stat-label">Saved Colleges</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="dash-stat-card">
+        <div class="dash-stat-icon text-primary"><i class="bi bi-layout-split"></i></div>
+        <div class="dash-stat-num" id="compareCount">0</div>
+        <div class="dash-stat-label">In Comparison</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="dash-stat-card">
+        <div class="dash-stat-icon text-success"><i class="bi bi-calendar-check"></i></div>
+        <div class="dash-stat-num">{{ current_user.created_at.strftime('%b %Y') }}</div>
+        <div class="dash-stat-label">Member Since</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="dash-stat-card">
+        <div class="dash-stat-icon text-warning"><i class="bi bi-clock-history"></i></div>
+        <div class="dash-stat-num">
+          {{ current_user.last_login.strftime('%d %b') if current_user.last_login else 'Now' }}
+        </div>
+        <div class="dash-stat-label">Last Login</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <h5 class="section-label">Quick Actions</h5>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{{ url_for('colleges.search') }}" class="quick-action-card text-decoration-none">
+        <i class="bi bi-search"></i>
+        <span>Search Colleges</span>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{{ url_for('main.favorites') }}" class="quick-action-card text-decoration-none">
+        <i class="bi bi-heart"></i>
+        <span>My Favorites</span>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{{ url_for('colleges.search') }}?sort_by=nirf_rank" class="quick-action-card text-decoration-none">
+        <i class="bi bi-trophy"></i>
+        <span>Top Ranked</span>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{{ url_for('colleges.search') }}?sort_by=placement_percentage" class="quick-action-card text-decoration-none">
+        <i class="bi bi-briefcase"></i>
+        <span>Best Placements</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Saved Colleges -->
+  <div class="mb-2 d-flex justify-content-between align-items-center">
+    <h5 class="section-label mb-0">Saved Colleges</h5>
+    <a href="{{ url_for('main.favorites') }}" class="btn btn-sm btn-outline-primary">View All</a>
+  </div>
+
+  {% if fav_colleges %}
+  <div class="row g-4">
+    {% set fav_ids = fav_colleges | map(attribute='id') | list | set %}
+    {% for college in fav_colleges[:6] %}
+    <div class="col-sm-6 col-lg-4">
+      {% include "colleges/_college_card.html" %}
+    </div>
+    {% endfor %}
+  </div>
+  {% if fav_colleges | length > 6 %}
+  <div class="text-center mt-4">
+    <a href="{{ url_for('main.favorites') }}" class="btn btn-outline-primary">
+      View All {{ fav_colleges | length }} Saved Colleges
+    </a>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state text-center py-5">
+    <div class="empty-icon mb-3"><i class="bi bi-heart"></i></div>
+    <h5 class="empty-title">No saved colleges yet</h5>
+    <p class="empty-desc">Browse colleges and click the heart icon to save them here.</p>
+    <a href="{{ url_for('colleges.search') }}" class="btn btn-primary mt-2">
+      <i class="bi bi-search me-2"></i>Browse Colleges
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

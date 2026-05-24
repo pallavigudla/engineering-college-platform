@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Compare Colleges</h2>
+
+    <form method="GET">
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <select name="ids" class="form-select mb-3">
+                    <option value="">Select College 1</option>
+
+                    {% for college in all_colleges %}
+                        <option value="{{ college.id }}">
+                            {{ college.name }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <select name="ids" class="form-select mb-3">
+                    <option value="">Select College 2</option>
+
+                    {% for college in all_colleges %}
+                        <option value="{{ college.id }}">
+                            {{ college.name }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    Compare
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+    {% if colleges %}
+
+    <div class="table-responsive mt-4">
+
+        <table class="table table-bordered table-striped">
+
+            <thead>
+                <tr>
+                    <th>Feature</th>
+
+                    {% for college in colleges %}
+                        <th>{{ college.short_name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>NIRF Rank</td>
+
+                    {% for college in colleges %}
+                        <td>{{ college.nirf_rank }}</td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td>State</td>
+
+                    {% for college in colleges %}
+                        <td>{{ college.state.name }}</td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td>City</td>
+
+                    {% for college in colleges %}
+                        <td>{{ college.city.name }}</td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td>Average Package</td>
+
+                    {% for college in colleges %}
+                        <td>{{ college.avg_package_lpa }} LPA</td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td>Highest Package</td>
+
+                    {% for college in colleges %}
+                        <td>{{ college.highest_package_lpa }} LPA</td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td>Placement %</td>
+
+                    {% for college in colleges %}
+                        <td>{{ college.placement_percentage }}%</td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td>Fees</td>
+
+                    {% for college in colleges %}
+                        <td>
+                            ₹{{ college.annual_fees_min }}
+                            -
+                            ₹{{ college.annual_fees_max }}
+                        </td>
+                    {% endfor %}
+                </tr>
+
+                <tr>
+                    <td>Website</td>
+
+                    {% for college in colleges %}
+                        <td>
+                            <a href="{{ college.official_website }}"
+                               target="_blank">
+                               Visit
+                            </a>
+                        </td>
+                    {% endfor %}
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

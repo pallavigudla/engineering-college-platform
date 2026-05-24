@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}Compare Colleges{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <h1 class="page-title mb-0">Compare Colleges</h1>
+    <a href="{{ url_for('colleges.search') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back to Search
+    </a>
+  </div>
+
+  {% if colleges | length < 2 %}
+  <div class="empty-state text-center py-5">
+    <div class="empty-icon"><i class="bi bi-layout-split"></i></div>
+    <h4 class="empty-title mt-3">Select at least 2 colleges to compare</h4>
+    <p class="empty-desc">Use the compare button on any college card while browsing.</p>
+    <a href="{{ url_for('colleges.search') }}" class="btn btn-primary mt-2">Browse Colleges</a>
+  </div>
+  {% else %}
+
+  <div class="compare-table-wrap">
+    <table class="table compare-table">
+      <thead>
+        <tr>
+          <th class="compare-label-col">Criteria</th>
+          {% for college in colleges %}
+          <th class="compare-college-col">
+            <div class="compare-college-header">
+              <div class="compare-logo">{{ college.short_name or college.name[:3].upper() }}</div>
+              <div class="compare-college-name">{{ college.name }}</div>
+              <div class="compare-college-loc text-muted small">
+                {{ college.city.name if college.city else '' }}{% if college.city %}, {% endif %}{{ college.state.name if college.state else '' }}
+              </div>
+              {% if current_user.is_authenticated %}
+              <button class="btn btn-sm btn-outline-danger mt-2"
+                      onclick="toggleFavorite({{ college.id }}, this)">
+                <i class="bi bi-heart me-1"></i>Save
+              </button>
+              {% endif %}
+            </div>
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- NIRF Rank -->
+        <tr class="compare-section-row">
+          <td colspan="{{ colleges | length + 1 }}"><strong><i class="bi bi-trophy me-2"></i>Rankings</strong></td>
+        </tr>
+        <tr>
+          <td class="compare-label">NIRF Rank</td>
+          {% for college in colleges %}
+          <td class="{{ 'compare-best' if colleges | map(attribute='nirf_rank') | reject('none') | min == college.nirf_rank else '' }}">
+            {% if college.nirf_rank %}
+              <span class="compare-rank-badge">#{{ college.nirf_rank }}</span>
+              {{ '🏆' if loop.first else '' }}
+            {% else %}Not Ranked{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">NIRF Score</td>
+          {% for college in colleges %}
+          <td>{{ college.nirf_score or '—' }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">NAAC Grade</td>
+          {% for college in colleges %}
+          <td>
+            {% if college.naac_grade %}
+            <span class="badge bg-success-subtle text-success">{{ college.naac_grade }}</span>
+            {% else %}—{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+
+        <!-- Type & Location -->
+        <tr class="compare-section-row">
+          <td colspan="{{ colleges | length + 1 }}"><strong><i class="bi bi-info-circle me-2"></i>Basic Info</strong></td>
+        </tr>
+        <tr>
+          <td class="compare-label">Type</td>
+          {% for college in colleges %}<td>{{ college.college_type or '—' }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">Established</td>
+          {% for college in colleges %}<td>{{ college.establishment_year or '—' }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">Affiliated To</td>
+          {% for college in colleges %}<td class="small">{{ college.affiliated_university or ('Autonomous' if college.autonomous else '—') }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">Total Seats</td>
+          {% for college in colleges %}<td>{{ "{:,}".format(college.total_seats) if college.total_seats else '—' }}</td>{% endfor %}
+        </tr>
+
+        <!-- Fees -->
+        <tr class="compare-section-row">
+          <td colspan="{{ colleges | length + 1 }}"><strong><i class="bi bi-currency-rupee me-2"></i>Fees</strong></td>
+        </tr>
+        <tr>
+          <td class="compare-label">Annual Fees (Min)</td>
+          {% for college in colleges %}
+          {% set min_fees = colleges | map(attribute='annual_fees_min') | reject('none') | list %}
+          <td class="{{ 'compare-best' if min_fees and min_fees | min == college.annual_fees_min else '' }}">
+            {% if college.annual_fees_min %}₹{{ "{:,}".format(college.annual_fees_min) }}{% else %}—{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">Annual Fees (Max)</td>
+          {% for college in colleges %}
+          <td>{% if college.annual_fees_max %}₹{{ "{:,}".format(college.annual_fees_max) }}{% else %}—{% endif %}</td>
+          {% endfor %}
+        </tr>
+
+        <!-- Placements -->
+        <tr class="compare-section-row">
+          <td colspan="{{ colleges | length + 1 }}"><strong><i class="bi bi-briefcase me-2"></i>Placements</strong></td>
+        </tr>
+        <tr>
+          <td class="compare-label">Placement %</td>
+          {% for college in colleges %}
+          {% set max_place = colleges | map(attribute='placement_percentage') | reject('none') | list %}
+          <td class="{{ 'compare-best' if max_place and max_place | max == college.placement_percentage else '' }}">
+            {% if college.placement_percentage %}
+            <div class="compare-progress">
+              <div class="compare-progress-fill" style="width: {{ college.placement_percentage }}%"></div>
+              <span class="compare-progress-label">{{ college.placement_percentage | int }}%</span>
+            </div>
+            {% else %}—{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">Average Package</td>
+          {% for college in colleges %}
+          {% set max_pkg = colleges | map(attribute='avg_package_lpa') | reject('none') | list %}
+          <td class="{{ 'compare-best' if max_pkg and max_pkg | max == college.avg_package_lpa else '' }}">
+            {{ (college.avg_package_lpa | string + ' LPA') if college.avg_package_lpa else '—' }}
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">Highest Package</td>
+          {% for college in colleges %}
+          <td>{{ (college.highest_package_lpa | string + ' LPA') if college.highest_package_lpa else '—' }}</td>
+          {% endfor %}
+        </tr>
+
+        <!-- Branches -->
+        <tr class="compare-section-row">
+          <td colspan="{{ colleges | length + 1 }}"><strong><i class="bi bi-diagram-3 me-2"></i>Branches</strong></td>
+        </tr>
+        {% for branch_name in all_branches %}
+        <tr>
+          <td class="compare-label small">{{ branch_name }}</td>
+          {% for college in colleges %}
+          <td class="text-center">
+            {% if branch_name in (college.branches | map(attribute='name') | list) %}
+            <i class="bi bi-check-circle-fill text-success"></i>
+            {% else %}
+            <i class="bi bi-x-circle text-muted opacity-50"></i>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+
+        <!-- Facilities -->
+        <tr class="compare-section-row">
+          <td colspan="{{ colleges | length + 1 }}"><strong><i class="bi bi-building-gear me-2"></i>Facilities</strong></td>
+        </tr>
+        <tr>
+          <td class="compare-label">Hostel</td>
+          {% for college in colleges %}
+          <td class="text-center">
+            {% if college.hostel_available %}
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <small class="d-block text-muted">
+              {% if college.boys_hostel %}Boys{% endif %}
+              {% if college.boys_hostel and college.girls_hostel %} + {% endif %}
+              {% if college.girls_hostel %}Girls{% endif %}
+            </small>
+            {% else %}
+            <i class="bi bi-x-circle text-muted opacity-50"></i>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="compare-label">Official Website</td>
+          {% for college in colleges %}
+          <td>
+            {% if college.official_website %}
+            <a href="{{ college.official_website }}" target="_blank" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-globe me-1"></i>Visit
+            </a>
+            {% else %}—{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Legend -->
+  <div class="compare-legend mt-3 text-muted small d-flex gap-4 flex-wrap">
+    <span><span class="compare-best-indicator"></span> Best value in this category</span>
+    <span><i class="bi bi-check-circle-fill text-success me-1"></i> Available</span>
+    <span><i class="bi bi-x-circle text-muted opacity-50 me-1"></i> Not available / unknown</span>
+  </div>
+
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}EduRank – Find Your Perfect Engineering College{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════ HERO SECTION ═══════════════════════════ -->
+<section class="hero-section">
+  <div class="hero-bg-decoration"></div>
+  <div class="container position-relative">
+    <div class="row align-items-center min-vh-hero">
+      <div class="col-lg-6 hero-text-col">
+        <div class="hero-badge">
+          <i class="bi bi-stars me-1"></i>
+          Trusted by 50,000+ Students
+        </div>
+        <h1 class="hero-title">
+          Find Your Perfect
+          <span class="hero-highlight">Engineering College</span>
+          in India
+        </h1>
+        <p class="hero-subtitle">
+          Compare {{ stats.total_colleges }}+ AICTE-approved colleges across
+          {{ stats.total_states }} states. Real data from NIRF, AICTE, and JoSAA.
+          Make the right choice for your future.
+        </p>
+
+        <!-- Quick Search Bar -->
+        <form class="hero-search-form" action="{{ url_for('colleges.search') }}" method="GET">
+          <div class="hero-search-wrap">
+            <div class="hero-search-input-group">
+              <i class="bi bi-search hero-search-icon"></i>
+              <input type="text" name="query" class="hero-search-input"
+                     placeholder="Search by college name, city, or branch…" autocomplete="off" />
+            </div>
+            <select name="state" class="hero-search-select">
+              <option value="">All States</option>
+              {% for state in states %}
+              <option value="{{ state.name }}">{{ state.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="hero-search-btn">
+              <i class="bi bi-search me-2"></i>Search
+            </button>
+          </div>
+        </form>
+
+        <!-- Quick filters -->
+        <div class="hero-quick-filters">
+          <span class="quick-filter-label">Quick filters:</span>
+          <a href="{{ url_for('colleges.search') }}?state=Maharashtra" class="quick-filter-tag">Maharashtra</a>
+          <a href="{{ url_for('colleges.search') }}?state=Tamil+Nadu" class="quick-filter-tag">Tamil Nadu</a>
+          <a href="{{ url_for('colleges.search') }}?state=Karnataka" class="quick-filter-tag">Karnataka</a>
+          <a href="{{ url_for('colleges.search') }}?college_type=Government" class="quick-filter-tag">Government</a>
+          <a href="{{ url_for('colleges.search') }}?hostel=y" class="quick-filter-tag">Hostel Available</a>
+        </div>
+      </div>
+
+      <!-- Hero Illustration / Stats -->
+      <div class="col-lg-6 d-none d-lg-flex justify-content-end">
+        <div class="hero-stats-card">
+          <div class="hero-stat-item">
+            <div class="stat-num">{{ stats.total_colleges }}+</div>
+            <div class="stat-desc">AICTE Approved Colleges</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat-item">
+            <div class="stat-num">{{ stats.total_states }}</div>
+            <div class="stat-desc">States Covered</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat-item">
+            <div class="stat-num">{{ stats.total_branches }}+</div>
+            <div class="stat-desc">Engineering Branches</div>
+          </div>
+
+          <div class="hero-data-badges mt-4">
+            <div class="data-badge">📊 NIRF 2024</div>
+            <div class="data-badge">🏛 AICTE</div>
+            <div class="data-badge">🎓 JoSAA</div>
+            <div class="data-badge">📋 AP/TS EAMCET</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ BROWSE BY BRANCH ══════════════════════ -->
+<section class="section-branch py-5">
+  <div class="container">
+    <div class="section-header text-center mb-4">
+      <h2 class="section-title">Browse by Branch</h2>
+      <p class="section-sub">Explore colleges offering your preferred engineering discipline</p>
+    </div>
+    <div class="row g-3 justify-content-center">
+      {% set branch_icons = {
+        'Computer Science Engineering': 'bi-cpu',
+        'Electronics and Communication Engineering': 'bi-broadcast',
+        'Mechanical Engineering': 'bi-gear',
+        'Electrical and Electronics Engineering': 'bi-lightning',
+        'Civil Engineering': 'bi-building',
+        'Information Technology': 'bi-globe',
+        'Artificial Intelligence and Machine Learning': 'bi-robot',
+        'Data Science': 'bi-bar-chart',
+        'Biotechnology': 'bi-flower1',
+        'Chemical Engineering': 'bi-flask',
+        'Aerospace Engineering': 'bi-rocket',
+        'Cybersecurity': 'bi-shield-lock',
+      } %}
+      {% for branch in branches[:12] %}
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <a href="{{ url_for('colleges.search') }}?branch={{ branch.name | urlencode }}"
+           class="branch-card text-center text-decoration-none d-block h-100">
+          <div class="branch-icon">
+            <i class="bi {{ branch_icons.get(branch.name, 'bi-mortarboard') }}"></i>
+          </div>
+          <div class="branch-name">{{ branch.code or branch.name[:15] }}</div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TOP NIRF COLLEGES ══════════════════════ -->
+<section class="section-colleges py-5 bg-subtle">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+      <div class="section-header">
+        <h2 class="section-title mb-1">Top Ranked Colleges</h2>
+        <p class="section-sub mb-0">By NIRF 2024 Rankings</p>
+      </div>
+      <a href="{{ url_for('colleges.search') }}?sort_by=nirf_rank" class="btn btn-outline-primary btn-sm">
+        View All <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+    <div class="row g-4">
+      {% for college in top_colleges %}
+      <div class="col-sm-6 col-lg-4">
+        {% include "colleges/_college_card.html" %}
+      </div>
+      {% else %}
+      <div class="col-12 text-center text-muted py-5">
+        <i class="bi bi-database-x fs-1 mb-3 d-block"></i>
+        No college data yet. Import a CSV from the Admin Panel.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TOP PLACEMENT COLLEGES ════════════════ -->
+<section class="section-placement py-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+      <div class="section-header">
+        <h2 class="section-title mb-1">Best Placement Colleges</h2>
+        <p class="section-sub mb-0">Highest placement percentages in India</p>
+      </div>
+      <a href="{{ url_for('colleges.search') }}?sort_by=placement_percentage" class="btn btn-outline-primary btn-sm">
+        View All <i class="bi bi-arrow-right ms-1"></i>
+      </a>
+    </div>
+    <div class="row g-4">
+      {% for college in top_placement %}
+      <div class="col-sm-6 col-lg-4">
+        {% include "colleges/_college_card.html" %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ WHY CHOOSE EDURANK ═══════════════════ -->
+<section class="section-features py-5 bg-subtle">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <h2 class="section-title">Why Choose EduRank?</h2>
+      <p class="section-sub">Everything you need to make the right college decision</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon"><i class="bi bi-database-check"></i></div>
+          <h5 class="feature-title">Real Official Data</h5>
+          <p class="feature-desc">Data sourced directly from NIRF, AICTE, JoSAA and state counseling portals. No guesswork.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon"><i class="bi bi-bar-chart-steps"></i></div>
+          <h5 class="feature-title">Smart Comparison</h5>
+          <p class="feature-desc">Compare up to 4 colleges side by side on fees, placements, NIRF rank, and facilities.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon"><i class="bi bi-heart"></i></div>
+          <h5 class="feature-title">Wishlist & Favorites</h5>
+          <p class="feature-desc">Save shortlisted colleges to your personal wishlist and access them anytime.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card h-100">
+          <div class="feature-icon"><i class="bi bi-funnel"></i></div>
+          <h5 class="feature-title">Powerful Filters</h5>
+          <p class="feature-desc">Filter by branch, fees, NIRF rank, placement %, hostel, state, and more.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CTA SECTION ═══════════════════════════ -->
+{% if not current_user.is_authenticated %}
+<section class="section-cta py-5">
+  <div class="container">
+    <div class="cta-card text-center">
+      <h2 class="cta-title">Start Your College Journey Today</h2>
+      <p class="cta-desc">Join 50,000+ students who found their dream college with EduRank.</p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="{{ url_for('auth.signup') }}" class="btn btn-cta-primary">
+          <i class="bi bi-person-plus me-2"></i>Sign Up Free
+        </a>
+        <a href="{{ url_for('colleges.search') }}" class="btn btn-cta-secondary">
+          <i class="bi bi-search me-2"></i>Browse Colleges
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

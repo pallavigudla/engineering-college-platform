@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Search Engineering Colleges{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-sidebar { position: sticky; top: 80px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+
+    <!-- ═══ SIDEBAR FILTERS ══════════════════════════════════ -->
+    <div class="col-lg-3 col-xl-2">
+      <div class="search-sidebar">
+        <div class="filter-panel">
+          <div class="filter-panel-header">
+            <i class="bi bi-funnel-fill me-2"></i>Filters
+            <a href="{{ url_for('colleges.search') }}" class="filter-clear-btn ms-auto">Clear All</a>
+          </div>
+
+          <form id="searchForm" action="{{ url_for('colleges.search') }}" method="GET">
+
+            <!-- Search -->
+            <div class="filter-group">
+              <label class="filter-label">Search by Name</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text border-end-0 bg-transparent">
+                  <i class="bi bi-search text-muted"></i>
+                </span>
+                {{ form.query(class="form-control border-start-0 ps-0", placeholder="College name…") }}
+              </div>
+            </div>
+
+            <!-- State -->
+            <div class="filter-group">
+              <label class="filter-label">State</label>
+              {{ form.state(class="form-select form-select-sm") }}
+            </div>
+
+            <!-- Branch -->
+            <div class="filter-group">
+              <label class="filter-label">Branch</label>
+              {{ form.branch(class="form-select form-select-sm") }}
+            </div>
+
+            <!-- College Type -->
+            <div class="filter-group">
+              <label class="filter-label">College Type</label>
+              {{ form.college_type(class="form-select form-select-sm") }}
+            </div>
+
+            <!-- NIRF Rank -->
+            <div class="filter-group">
+              <label class="filter-label">NIRF Rank (up to)</label>
+              {{ form.nirf_rank_max(class="form-control form-control-sm", placeholder="e.g. 100") }}
+            </div>
+
+            <!-- Max Fees -->
+            <div class="filter-group">
+              <label class="filter-label">Max Annual Fees (₹)</label>
+              {{ form.fees_max(class="form-control form-control-sm", placeholder="e.g. 200000") }}
+              <small class="text-muted">Enter in rupees (e.g. 200000 = ₹2L)</small>
+            </div>
+
+            <!-- Min Placement -->
+            <div class="filter-group">
+              <label class="filter-label">Min Placement %</label>
+              {{ form.placement_min(class="form-control form-control-sm", placeholder="e.g. 75") }}
+            </div>
+
+            <!-- Hostel -->
+            <div class="filter-group">
+              <div class="form-check">
+                {{ form.hostel(class="form-check-input") }}
+                <label class="form-check-label" for="hostel">Hostel Available</label>
+              </div>
+            </div>
+
+            <!-- Sort -->
+            <div class="filter-group">
+              <label class="filter-label">Sort By</label>
+              {{ form.sort_by(class="form-select form-select-sm") }}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-2">
+              <i class="bi bi-search me-2"></i>Apply Filters
+            </button>
+          </form>
+        </div>
+
+        <!-- Compare Tray (shows when items added) -->
+        <div id="compareTray" class="compare-tray d-none mt-3">
+          <div class="compare-tray-header">
+            <i class="bi bi-layout-split me-2"></i>Compare
+            <span id="compareCount" class="badge bg-primary ms-auto">0</span>
+          </div>
+          <div id="compareList" class="compare-tray-list"></div>
+          <a id="compareBtn" href="#" class="btn btn-sm btn-compare-go w-100 mt-2 d-none">
+            Compare Now <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ RESULTS AREA ════════════════════════════════════ -->
+    <div class="col-lg-9 col-xl-10">
+
+      <!-- Results Header -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+          <h1 class="results-title">
+            Engineering Colleges
+            {% if form.query.data %}
+              matching "<strong>{{ form.query.data }}</strong>"
+            {% endif %}
+          </h1>
+          <p class="results-count mb-0">
+            <strong>{{ total }}</strong> college{{ 's' if total != 1 }} found
+          </p>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="view-toggle">
+          <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')" title="Grid View">
+            <i class="bi bi-grid-3x3-gap"></i>
+          </button>
+          <button class="view-btn" id="listViewBtn" onclick="setView('list')" title="List View">
+            <i class="bi bi-list-ul"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Filters Display -->
+      {% set has_filters = form.query.data or form.state.data or form.branch.data or form.college_type.data or form.nirf_rank_max.data or form.fees_max.data or form.placement_min.data or form.hostel.data %}
+      {% if has_filters %}
+      <div class="active-filters mb-3 d-flex flex-wrap gap-2 align-items-center">
+        <span class="text-muted small">Active:</span>
+      {% if form.query.data %}
+<span class="filter-chip">
+    Name: {{ form.query.data }}
+</span>
+{% endif %}
+
+{% if form.state.data %}
+        <span class="filter-chip">{{ form.state.data }}</span>
+        {% endif %}
+        {% if form.branch.data %}
+        <span class="filter-chip">{{ form.branch.data }}</span>
+        {% endif %}
+        {% if form.college_type.data %}
+        <span class="filter-chip">{{ form.college_type.data }}</span>
+        {% endif %}
+        {% if form.nirf_rank_max.data %}
+        <span class="filter-chip">NIRF ≤ {{ form.nirf_rank_max.data }}</span>
+        {% endif %}
+        {% if form.fees_max.data %}
+        <span class="filter-chip">Fees ≤ ₹{{ "{:,}".format(form.fees_max.data) }}</span>
+        {% endif %}
+        {% if form.placement_min.data %}
+        <span class="filter-chip">Placement ≥ {{ form.placement_min.data }}%</span>
+        {% endif %}
+        {% if form.hostel.data %}
+        <span class="filter-chip">Hostel ✓</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- College Grid -->
+      <div id="collegeGrid" class="row g-4">
+        {% for college in colleges %}
+        <div class="col-sm-6 col-xl-4 college-grid-item">
+          {% include "colleges/_college_card.html" %}
+        </div>
+        {% else %}
+        <div class="col-12">
+          <div class="empty-state text-center py-5">
+            <div class="empty-icon mb-3"><i class="bi bi-building-slash"></i></div>
+            <h4 class="empty-title">No colleges found</h4>
+            <p class="empty-desc">Try adjusting your filters or <a href="{{ url_for('colleges.search') }}">clearing all filters</a>.</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination.pages > 1 %}
+      <nav class="mt-5" aria-label="Results pagination">
+        <ul class="pagination edu-pagination justify-content-center">
+
+          <!-- Previous -->
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('colleges.search', page=pagination.prev_num, **request.args) if pagination.has_prev else '#' }}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+
+          {% for page_num in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if page_num %}
+              <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('colleges.search', page=page_num, **request.args) }}">
+                  {{ page_num }}
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+
+          <!-- Next -->
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('colleges.search', page=pagination.next_num, **request.args) if pagination.has_next else '#' }}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+        <p class="text-center text-muted small mt-2">
+          Page {{ pagination.page }} of {{ pagination.pages }} · {{ total }} total results
+        </p>
+      </nav>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── View toggle: grid / list ─────────────────────────────────
+function setView(mode) {
+  const grid = document.getElementById('collegeGrid');
+  const gBtn = document.getElementById('gridViewBtn');
+  const lBtn = document.getElementById('listViewBtn');
+  if (mode === 'list') {
+    grid.querySelectorAll('.college-grid-item').forEach(el => {
+      el.className = 'col-12 college-grid-item';
+    });
+    gBtn.classList.remove('active'); lBtn.classList.add('active');
+    localStorage.setItem('edurank_view', 'list');
+  } else {
+    grid.querySelectorAll('.college-grid-item').forEach(el => {
+      el.className = 'col-sm-6 col-xl-4 college-grid-item';
+    });
+    lBtn.classList.remove('active'); gBtn.classList.add('active');
+    localStorage.setItem('edurank_view', 'grid');
+  }
+}
+
+// Restore saved view preference
+document.addEventListener('DOMContentLoaded', () => {
+  const savedView = localStorage.getItem('edurank_view');
+  if (savedView === 'list') setView('list');
+});
+</script>
+{% endblock %}

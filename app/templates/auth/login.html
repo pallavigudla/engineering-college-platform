@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-left d-none d-lg-flex">
+    <div class="auth-left-content">
+      <div class="auth-brand mb-4">
+        <div class="brand-icon-lg"><i class="bi bi-mortarboard-fill"></i></div>
+        <span class="brand-name-lg">EduRank</span>
+      </div>
+      <h2 class="auth-left-title">Find Your Perfect Engineering College</h2>
+      <p class="auth-left-sub">Access real data from NIRF, AICTE, JoSAA and compare 2,000+ colleges across India.</p>
+      <div class="auth-features">
+        <div class="auth-feature-item"><i class="bi bi-check-circle-fill me-2 text-success"></i>NIRF 2024 Rankings</div>
+        <div class="auth-feature-item"><i class="bi bi-check-circle-fill me-2 text-success"></i>Compare Colleges Side-by-Side</div>
+        <div class="auth-feature-item"><i class="bi bi-check-circle-fill me-2 text-success"></i>Save Your Favorites</div>
+        <div class="auth-feature-item"><i class="bi bi-check-circle-fill me-2 text-success"></i>Real Placement & Fees Data</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <div class="auth-form-header">
+        <h2 class="auth-form-title">Welcome back</h2>
+        <p class="auth-form-sub">Log in to access your saved colleges and comparisons</p>
+      </div>
+
+      <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="email">Email Address</label>
+          {{ form.email(class="form-control edu-input" + (" is-invalid" if form.email.errors else ""),
+                        id="email", placeholder="you@example.com", autocomplete="email") }}
+          {% for error in form.email.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <label class="form-label fw-semibold" for="password">Password</label>
+          </div>
+          <div class="input-group">
+            {{ form.password(class="form-control edu-input border-end-0" + (" is-invalid" if form.password.errors else ""),
+                             id="password", placeholder="Enter your password", autocomplete="current-password") }}
+            <button class="btn btn-outline-secondary border-start-0" type="button"
+                    onclick="togglePwd('password', this)" tabindex="-1">
+              <i class="bi bi-eye"></i>
+            </button>
+            {% for error in form.password.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-4 d-flex align-items-center justify-content-between">
+          <div class="form-check">
+            {{ form.remember_me(class="form-check-input") }}
+            <label class="form-check-label" for="remember_me">Remember me</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-edu-primary w-100 mb-3">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Log In
+        </button>
+
+        <p class="text-center text-muted mb-0">
+          Don't have an account?
+          <a href="{{ url_for('auth.signup') }}" class="auth-link fw-semibold">Sign up free</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function togglePwd(fieldId, btn) {
+  const field = document.getElementById(fieldId);
+  const icon = btn.querySelector('i');
+  if (field.type === 'password') {
+    field.type = 'text';
+    icon.className = 'bi bi-eye-slash';
+  } else {
+    field.type = 'password';
+    icon.className = 'bi bi-eye';
+  }
+}
+</script>
+{% endblock %}

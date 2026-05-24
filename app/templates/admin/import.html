@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Import Dataset{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-lg-2 d-none d-lg-block">
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-brand"><i class="bi bi-speedometer2 me-2"></i>Admin</div>
+        <nav class="admin-nav">
+          <a class="admin-nav-link" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
+          <a class="admin-nav-link" href="{{ url_for('admin.users') }}"><i class="bi bi-people"></i><span>Users</span></a>
+          <a class="admin-nav-link active" href="{{ url_for('admin.import_data') }}"><i class="bi bi-cloud-upload"></i><span>Import Data</span></a>
+          <a class="admin-nav-link" href="{{ url_for('admin.import_logs') }}"><i class="bi bi-journal-text"></i><span>Import Logs</span></a>
+          <hr class="my-2 opacity-25">
+          <a class="admin-nav-link" href="{{ url_for('main.index') }}"><i class="bi bi-house"></i><span>View Site</span></a>
+          <a class="admin-nav-link text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i><span>Logout</span></a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="col-lg-10">
+      <div class="admin-page-header mb-4">
+        <h1 class="admin-page-title">Dataset Import System</h1>
+        <p class="text-muted">Upload CSV files from NIRF, AICTE, JoSAA, or counseling portals</p>
+      </div>
+
+      <div class="row g-4">
+
+        <!-- Upload Form -->
+        <div class="col-lg-5">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h5 class="admin-card-title"><i class="bi bi-cloud-upload me-2"></i>Upload CSV Dataset</h5>
+            </div>
+            <div class="admin-card-body">
+              <form method="POST" action="{{ url_for('admin.import_data') }}"
+                    enctype="multipart/form-data" novalidate id="importForm">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">CSV File</label>
+                  <div class="drop-zone" id="dropZone" onclick="document.getElementById('csv_file').click()">
+                    <i class="bi bi-file-earmark-spreadsheet fs-2 text-primary mb-2"></i>
+                    <div class="drop-zone-text">Drop CSV file here or <span class="text-primary">browse</span></div>
+                    <div class="drop-zone-sub text-muted small" id="dropZoneSub">Max 16 MB · .csv only</div>
+                  </div>
+                  {{ form.csv_file(class="d-none", id="csv_file", accept=".csv") }}
+                  {% for error in form.csv_file.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Data Source</label>
+                  {{ form.source(class="form-select") }}
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label fw-semibold">Import Mode</label>
+                  {{ form.mode(class="form-select") }}
+                  <small class="text-muted">"Insert & Update" is recommended — it won't create duplicates.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" id="importBtn">
+                  <i class="bi bi-cloud-upload me-2"></i>Start Import
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- CSV Format Guide -->
+        <div class="col-lg-7">
+          <div class="admin-card mb-4">
+            <div class="admin-card-header">
+              <h5 class="admin-card-title"><i class="bi bi-info-circle me-2"></i>CSV Column Reference</h5>
+            </div>
+            <div class="admin-card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-sm edu-table mb-0">
+                  <thead>
+                    <tr><th>Column Name</th><th>Required</th><th>Example</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>name</code></td><td><span class="badge bg-danger">Required</span></td><td>IIT Bombay</td></tr>
+                    <tr><td><code>state</code></td><td><span class="badge bg-danger">Required</span></td><td>Maharashtra</td></tr>
+                    <tr><td><code>city</code></td><td><span class="badge bg-secondary">Optional</span></td><td>Mumbai</td></tr>
+                    <tr><td><code>college_type</code></td><td><span class="badge bg-secondary">Optional</span></td><td>Government</td></tr>
+                    <tr><td><code>nirf_rank</code></td><td><span class="badge bg-secondary">Optional</span></td><td>1</td></tr>
+                    <tr><td><code>naac_grade</code></td><td><span class="badge bg-secondary">Optional</span></td><td>A++</td></tr>
+                    <tr><td><code>annual_fees_min</code></td><td><span class="badge bg-secondary">Optional</span></td><td>250000</td></tr>
+                    <tr><td><code>placement_percentage</code></td><td><span class="badge bg-secondary">Optional</span></td><td>95.5</td></tr>
+                    <tr><td><code>avg_package_lpa</code></td><td><span class="badge bg-secondary">Optional</span></td><td>18.5</td></tr>
+                    <tr><td><code>highest_package_lpa</code></td><td><span class="badge bg-secondary">Optional</span></td><td>150.0</td></tr>
+                    <tr><td><code>hostel_available</code></td><td><span class="badge bg-secondary">Optional</span></td><td>Yes / No</td></tr>
+                    <tr><td><code>official_website</code></td><td><span class="badge bg-secondary">Optional</span></td><td>https://iitb.ac.in</td></tr>
+                    <tr><td><code>branches</code></td><td><span class="badge bg-secondary">Optional</span></td><td>CSE,ECE,MECH (comma-separated)</td></tr>
+                    <tr><td><code>facilities</code></td><td><span class="badge bg-secondary">Optional</span></td><td>Library,Hostel (Boys) (comma-separated)</td></tr>
+                    <tr><td><code>top_recruiters</code></td><td><span class="badge bg-secondary">Optional</span></td><td>Google,Microsoft,Amazon</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sample CSV Download -->
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h5 class="admin-card-title"><i class="bi bi-download me-2"></i>Sample Datasets</h5>
+            </div>
+            <div class="admin-card-body">
+              <p class="text-muted small mb-3">Download sample CSV files to understand the format:</p>
+              <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('static', filename='samples/nirf_template.csv') }}"
+                   class="btn btn-sm btn-outline-primary" download>
+                  <i class="bi bi-file-earmark-spreadsheet me-1"></i>NIRF Template
+                </a>
+                <a href="{{ url_for('static', filename='samples/aicte_template.csv') }}"
+                   class="btn btn-sm btn-outline-primary" download>
+                  <i class="bi bi-file-earmark-spreadsheet me-1"></i>AICTE Template
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Import Logs -->
+        <div class="col-12">
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h5 class="admin-card-title"><i class="bi bi-journal-text me-2"></i>Recent Imports</h5>
+              <a href="{{ url_for('admin.import_logs') }}" class="btn btn-sm btn-outline-primary">Full History</a>
+            </div>
+            <div class="admin-card-body p-0">
+              <div class="table-responsive">
+                <table class="table edu-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>File</th><th>Source</th><th>Added</th><th>Updated</th>
+                      <th>Failed</th><th>Status</th><th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for log in recent_logs %}
+                    <tr>
+                      <td class="small font-monospace">{{ log.filename[:30] }}...</td>
+                      <td><span class="badge bg-primary-subtle text-primary">{{ log.source }}</span></td>
+                      <td class="text-success">{{ log.records_added }}</td>
+                      <td class="text-primary">{{ log.records_updated }}</td>
+                      <td class="{{ 'text-danger' if log.records_failed > 0 else 'text-muted' }}">{{ log.records_failed }}</td>
+                      <td>
+                        <span class="badge {{ 'bg-success-subtle text-success' if log.status == 'success' else 'bg-danger-subtle text-danger' if log.status == 'failed' else 'bg-warning-subtle text-warning' }}">
+                          {{ log.status | title }}
+                        </span>
+                      </td>
+                      <td class="text-muted small">{{ log.started_at.strftime('%d %b %Y %H:%M') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">No imports yet</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Drop zone behavior
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('csv_file');
+const sub = document.getElementById('dropZoneSub');
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) {
+    sub.textContent = `Selected: ${fileInput.files[0].name}`;
+    dropZone.classList.add('drop-zone-active');
+  }
+});
+
+['dragenter','dragover'].forEach(evt => {
+  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drop-zone-hover'); });
+});
+['dragleave','drop'].forEach(evt => {
+  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drop-zone-hover'); });
+});
+dropZone.addEventListener('drop', e => {
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+    sub.textContent = `Selected: ${file.name}`;
+    dropZone.classList.add('drop-zone-active');
+  }
+});
+
+// Loading state on submit
+document.getElementById('importForm').addEventListener('submit', () => {
+  const btn = document.getElementById('importBtn');
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Importing…';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

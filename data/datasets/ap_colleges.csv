@@ -1,0 +1,11 @@
+name,short_name,college_type,state,city,address,nirf_rank,nirf_score,nirf_year,naac_grade,annual_fees_min,annual_fees_max,placement_percentage,avg_package_lpa,highest_package_lpa,hostel_available,boys_hostel,girls_hostel,affiliated_university,autonomous,official_website,branches,facilities,top_recruiters,description,total_seats
+
+VIT-AP University,VIT-AP,Private,Andhra Pradesh,Amaravati,Inavolu Amaravati,55,60.22,2024,A++,195000,250000,88,9,25,Yes,Yes,Yes,VIT University,Yes,https://vitap.ac.in,"CSE,AI,DS,ECE,ME","Library,Hostel,Gym,WiFi","Infosys,TCS,Microsoft","Modern private university",3500
+
+KL University,KLU,Private,Andhra Pradesh,Guntur,Vaddeswaram Guntur,58,58.90,2024,A++,180000,240000,87,8,22,Yes,Yes,Yes,KL University,Yes,https://www.kluniversity.in,"CSE,AI,DS,ECE,EEE","Library,Hostel,Sports","TCS,Wipro,Accenture","Top AP private university",3200
+
+Gayatri Vidya Parishad College of Engineering,GVPCE,Private,Andhra Pradesh,Visakhapatnam,Madhurawada Vizag,95,48.22,2024,A+,70000,120000,82,6,14,Yes,Yes,Yes,Andhra University,Yes,https://www.gvpce.ac.in,"CSE,ECE,EEE,ME","Library,Hostel,WiFi","Infosys,TCS,Cognizant","Top Vizag engineering college",1800
+
+RVR and JC College of Engineering,RVRJC,Private,Andhra Pradesh,Guntur,Chowdavaram Guntur,110,45.88,2024,A+,65000,110000,80,5,12,Yes,Yes,Yes,ANU,Yes,https://www.rvrjcce.ac.in,"CSE,ECE,EEE,CE","Library,Hostel,Sports","Infosys,TCS,Wipro","Well known AP engineering college",1700
+
+SRKR Engineering College,SRKR,Private,Andhra Pradesh,Bhimavaram,Chinna Amiram Bhimavaram,120,44.55,2024,A+,60000,100000,79,5,10,Yes,Yes,Yes,JNTUK,Yes,https://www.srkrec.edu.in,"CSE,ECE,EEE,ME","Library,Hostel,WiFi","TCS,Infosys,Wipro","Popular West Godavari college",1600

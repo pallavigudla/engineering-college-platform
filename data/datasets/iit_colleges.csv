@@ -1,0 +1,11 @@
+name,short_name,college_type,state,city,address,nirf_rank,nirf_score,nirf_year,naac_grade,annual_fees_min,annual_fees_max,placement_percentage,avg_package_lpa,highest_package_lpa,hostel_available,boys_hostel,girls_hostel,affiliated_university,autonomous,official_website,branches,facilities,top_recruiters,description,total_seats
+
+Indian Institute of Technology Madras,IIT Madras,Govt,Tamil Nadu,Chennai,IIT P.O. Chennai,1,89.79,2024,A++,75000,250000,96,21,60,Yes,Yes,Yes,IIT System,Yes,https://www.iitm.ac.in,"CSE,ECE,ME,EE,AI","Library,Hostel,Sports,WiFi","Google,Microsoft,Amazon","Top IIT in India",1200
+
+Indian Institute of Technology Bombay,IIT Bombay,Govt,Maharashtra,Mumbai,Powai Mumbai,2,88.32,2024,A++,80000,260000,95,22,58,Yes,Yes,Yes,IIT System,Yes,https://www.iitb.ac.in,"CSE,ECE,ME,EE,AI","Library,Hostel,Sports,WiFi","Google,Microsoft,Amazon","Premier IIT",1100
+
+Indian Institute of Technology Delhi,IIT Delhi,Govt,Delhi,New Delhi,Hauz Khas New Delhi,3,87.45,2024,A++,85000,270000,96,23,62,Yes,Yes,Yes,IIT System,Yes,https://home.iitd.ac.in,"CSE,ECE,ME,EE,AI","Library,Hostel,Sports,WiFi","Google,Meta,Amazon","Leading IIT",1150
+
+Indian Institute of Technology Kanpur,IIT Kanpur,Govt,Uttar Pradesh,Kanpur,Kalyanpur Kanpur,4,83.21,2024,A++,70000,240000,94,20,55,Yes,Yes,Yes,IIT System,Yes,https://www.iitk.ac.in,"CSE,ECE,ME,CE","Library,Hostel,Sports","Google,Adobe,Microsoft","Top engineering institute",1050
+
+Indian Institute of Technology Kharagpur,IIT Kharagpur,Govt,West Bengal,Kharagpur,Kharagpur West Bengal,5,82.56,2024,A++,72000,245000,93,18,52,Yes,Yes,Yes,IIT System,Yes,https://www.iitkgp.ac.in,"CSE,ECE,ME,EE","Library,Hostel,WiFi","Amazon,TCS,Microsoft","Oldest IIT",1300

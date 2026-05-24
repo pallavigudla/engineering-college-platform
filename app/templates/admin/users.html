@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <div class="col-lg-2 d-none d-lg-block">
+      <div class="admin-sidebar">
+        <div class="admin-sidebar-brand"><i class="bi bi-speedometer2 me-2"></i>Admin</div>
+        <nav class="admin-nav">
+          <a class="admin-nav-link" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
+          <a class="admin-nav-link active" href="{{ url_for('admin.users') }}"><i class="bi bi-people"></i><span>Users</span></a>
+          <a class="admin-nav-link" href="{{ url_for('admin.import_data') }}"><i class="bi bi-cloud-upload"></i><span>Import Data</span></a>
+          <a class="admin-nav-link" href="{{ url_for('admin.import_logs') }}"><i class="bi bi-journal-text"></i><span>Import Logs</span></a>
+          <hr class="my-2 opacity-25">
+          <a class="admin-nav-link" href="{{ url_for('main.index') }}"><i class="bi bi-house"></i><span>View Site</span></a>
+          <a class="admin-nav-link text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i><span>Logout</span></a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="col-lg-10">
+      <div class="admin-page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h1 class="admin-page-title">User Management</h1>
+          <p class="text-muted mb-0">{{ pagination.total }} registered students</p>
+        </div>
+        <form class="d-flex gap-2" action="{{ url_for('admin.users') }}" method="GET">
+          <input type="text" name="q" class="form-control form-control-sm" placeholder="Search name or email…"
+                 value="{{ search }}" style="width: 220px;">
+          <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-search"></i></button>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-body p-0">
+          <div class="table-responsive">
+            <table class="table edu-table mb-0">
+              <thead>
+                <tr>
+                  <th>#</th><th>Name</th><th>Email</th><th>Joined</th>
+                  <th>Last Login</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                <tr>
+                  <td class="text-muted">{{ user.id }}</td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="user-avatar-xs">{{ user.full_name[0].upper() }}</div>
+                      <div>
+                        <div class="fw-semibold">{{ user.full_name }}</div>
+                        {% if user.is_admin %}
+                        <span class="badge bg-warning-subtle text-warning">Admin</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-muted">{{ user.email }}</td>
+                  <td class="text-muted small">{{ user.created_at.strftime('%d %b %Y') }}</td>
+                  <td class="text-muted small">
+                    {{ user.last_login.strftime('%d %b %Y %H:%M') if user.last_login else 'Never' }}
+                  </td>
+                  <td>
+                    <span class="badge {{ 'bg-success-subtle text-success' if user.is_active else 'bg-danger-subtle text-danger' }}">
+                      {{ 'Active' if user.is_active else 'Inactive' }}
+                    </span>
+                  </td>
+                  <td>
+                    {% if not user.is_admin %}
+                    <form method="POST" action="{{ url_for('admin.toggle_user', user_id=user.id) }}"
+                          class="d-inline">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button type="submit"
+                              class="btn btn-sm {{ 'btn-outline-danger' if user.is_active else 'btn-outline-success' }}"
+                              onclick="return confirm('{{ 'Deactivate' if user.is_active else 'Activate' }} this user?')">
+                        {{ 'Deactivate' if user.is_active else 'Activate' }}
+                      </button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted small">Protected</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No users found</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination.pages > 1 %}
+      <nav class="mt-4" aria-label="User pagination">
+        <ul class="pagination edu-pagination justify-content-center">
+          {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+              <li class="page-item {{ 'active' if page_num == pagination.page }}">
+                <a class="page-link" href="{{ url_for('admin.users', page=page_num, q=search) }}">{{ page_num }}</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </nav>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

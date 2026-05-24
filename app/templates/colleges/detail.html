@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+{% block title %}{{ college.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb edu-breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('colleges.search') }}">Colleges</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ college.short_name or college.name[:40] }}</li>
+    </ol>
+  </nav>
+
+  <!-- ═══ COLLEGE HEADER ════════════════════════════════════ -->
+  <div class="detail-header-card mb-4">
+    <div class="row align-items-center g-4">
+      <div class="col-md-auto">
+        <div class="detail-logo-wrap">
+          {% if college.logo_url %}
+          <img src="{{ college.logo_url }}" alt="{{ college.name }}" class="detail-logo" />
+          {% else %}
+          <div class="detail-logo-placeholder">
+            {{ college.short_name or college.name[:3].upper() }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+          <div>
+            <h1 class="detail-college-name">{{ college.name }}</h1>
+            <p class="detail-college-location mb-2">
+              <i class="bi bi-geo-alt-fill me-1 text-primary"></i>
+              {{ college.address or '' }}
+              {% if college.city %}{{ college.city.name }}, {% endif %}
+              {{ college.state.name if college.state else '' }}
+              {% if college.pincode %} – {{ college.pincode }}{% endif %}
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              {% if college.college_type %}
+              <span class="detail-badge {{ 'badge-govt' if college.college_type == 'Government' else 'badge-private' if college.college_type == 'Private' else 'badge-deemed' }}">
+                {{ college.college_type }}
+              </span>
+              {% endif %}
+              {% if college.naac_grade %}
+              <span class="detail-badge badge-naac">NAAC {{ college.naac_grade }}</span>
+              {% endif %}
+              {% if college.autonomous %}
+              <span class="detail-badge badge-auto">Autonomous</span>
+              {% endif %}
+              {% if college.hostel_available %}
+              <span class="detail-badge badge-hostel">
+                <i class="bi bi-house-check me-1"></i>Hostel
+              </span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2 flex-wrap">
+            {% if current_user.is_authenticated %}
+            <button id="favBtn" onclick="toggleFavorite({{ college.id }}, this)"
+                    class="btn {% if is_favorite %}btn-danger{% else %}btn-outline-danger{% endif %} btn-sm">
+              <i class="bi bi-heart{% if is_favorite %}-fill{% endif %} me-1"></i>
+              {% if is_favorite %}Saved{% else %}Save{% endif %}
+            </button>
+            {% endif %}
+            <button onclick="addToCompare({{ college.id }}, '{{ college.name | replace("'", "\\'") }}')"
+                    class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-layout-split me-1"></i>Compare
+            </button>
+            {% if college.official_website %}
+            <a href="{{ college.official_website }}" target="_blank" rel="noopener"
+               class="btn btn-primary btn-sm">
+              <i class="bi bi-globe me-1"></i>Official Site
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ KEY STATS ROW ════════════════════════════════════ -->
+  <div class="row g-3 mb-4">
+    {% if college.nirf_rank %}
+    <div class="col-6 col-sm-3">
+      <div class="stat-card text-center h-100">
+        <div class="stat-card-icon text-warning"><i class="bi bi-trophy-fill"></i></div>
+        <div class="stat-card-value">#{{ college.nirf_rank }}</div>
+        <div class="stat-card-label">NIRF Rank {{ college.nirf_year or '2024' }}</div>
+      </div>
+    </div>
+    {% endif %}
+    {% if college.placement_percentage %}
+    <div class="col-6 col-sm-3">
+      <div class="stat-card text-center h-100">
+        <div class="stat-card-icon text-success"><i class="bi bi-briefcase-fill"></i></div>
+        <div class="stat-card-value">{{ college.placement_percentage | int }}%</div>
+        <div class="stat-card-label">Placement Rate</div>
+      </div>
+    </div>
+    {% endif %}
+    {% if college.avg_package_lpa %}
+    <div class="col-6 col-sm-3">
+      <div class="stat-card text-center h-100">
+        <div class="stat-card-icon text-primary"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="stat-card-value">{{ college.avg_package_lpa }} LPA</div>
+        <div class="stat-card-label">Average Package</div>
+      </div>
+    </div>
+    {% endif %}
+    {% if college.annual_fees_min %}
+    <div class="col-6 col-sm-3">
+      <div class="stat-card text-center h-100">
+        <div class="stat-card-icon text-info"><i class="bi bi-currency-rupee"></i></div>
+        <div class="stat-card-value">
+          ₹{{ (college.annual_fees_min / 100000) | round(1) }}L
+        </div>
+        <div class="stat-card-label">Annual Fees (min)</div>
+      </div>
+    </div>
+    {% endif %}
+    {% if college.highest_package_lpa %}
+    <div class="col-6 col-sm-3">
+      <div class="stat-card text-center h-100">
+        <div class="stat-card-icon text-danger"><i class="bi bi-stars"></i></div>
+        <div class="stat-card-value">{{ college.highest_package_lpa }} LPA</div>
+        <div class="stat-card-label">Highest Package</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ═══ MAIN DETAIL TABS ══════════════════════════════════ -->
+  <div class="row g-4">
+    <div class="col-lg-8">
+
+      <!-- Tab Nav -->
+      <ul class="nav edu-tabs mb-4" id="detailTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="edu-tab-btn active" data-bs-toggle="tab" data-bs-target="#overview" type="button">Overview</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="edu-tab-btn" data-bs-toggle="tab" data-bs-target="#courses" type="button">Courses & Fees</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="edu-tab-btn" data-bs-toggle="tab" data-bs-target="#placements" type="button">Placements</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="edu-tab-btn" data-bs-toggle="tab" data-bs-target="#facilities" type="button">Facilities</button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+
+        <!-- ── Overview Tab ── -->
+        <div class="tab-pane fade show active" id="overview">
+          {% if college.description %}
+          <p class="detail-description">{{ college.description }}</p>
+          {% endif %}
+
+          <div class="detail-info-grid">
+            <div class="info-row">
+              <span class="info-label"><i class="bi bi-calendar3 me-2"></i>Established</span>
+              <span class="info-value">{{ college.establishment_year or 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label"><i class="bi bi-building me-2"></i>Type</span>
+              <span class="info-value">{{ college.college_type or 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label"><i class="bi bi-university me-2"></i>Affiliated To</span>
+              <span class="info-value">{{ college.affiliated_university or 'Autonomous' if college.autonomous else college.affiliated_university or 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label"><i class="bi bi-people me-2"></i>Total Seats</span>
+              <span class="info-value">{{ "{:,}".format(college.total_seats) if college.total_seats else 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label"><i class="bi bi-star me-2"></i>NAAC Grade</span>
+              <span class="info-value">
+                {% if college.naac_grade %}
+                <span class="detail-badge badge-naac">{{ college.naac_grade }}</span>
+                {% else %}N/A{% endif %}
+              </span>
+            </div>
+            {% if college.aicte_id %}
+            <div class="info-row">
+              <span class="info-label"><i class="bi bi-card-list me-2"></i>AICTE ID</span>
+              <span class="info-value font-monospace">{{ college.aicte_id }}</span>
+            </div>
+            {% endif %}
+            {% if college.email %}
+            <div class="info-row">
+              <span class="info-label"><i class="bi bi-envelope me-2"></i>Email</span>
+              <span class="info-value"><a href="mailto:{{ college.email }}">{{ college.email }}</a></span>
+            </div>
+            {% endif %}
+            {% if college.phone %}
+            <div class="info-row">
+              <span class="info-label"><i class="bi bi-telephone me-2"></i>Phone</span>
+              <span class="info-value">{{ college.phone }}</span>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Branches -->
+          {% if college.branches %}
+          <h5 class="detail-section-title mt-4">Branches Offered</h5>
+          <div class="d-flex flex-wrap gap-2">
+            {% for branch in college.branches %}
+            <a href="{{ url_for('colleges.search') }}?branch={{ branch.name | urlencode }}"
+               class="btn btn-sm btn-outline-primary rounded-pill">
+              {{ branch.name }}
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- ── Courses Tab ── -->
+        <div class="tab-pane fade" id="courses">
+          {% if college.courses.count() > 0 %}
+          <div class="table-responsive">
+            <table class="table edu-table">
+              <thead>
+                <tr>
+                  <th>Course</th>
+                  <th>Degree</th>
+                  <th>Duration</th>
+                  <th>Seats</th>
+                  <th>Annual Fees</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for course in college.courses %}
+                <tr>
+                  <td><strong>{{ course.name }}</strong></td>
+                  <td><span class="badge bg-primary-subtle text-primary">{{ course.degree or 'B.Tech' }}</span></td>
+                  <td>{{ course.duration_years or 4 }} yrs</td>
+                  <td>{{ course.seats or 'N/A' }}</td>
+                  <td>{% if course.annual_fees %}₹{{ "{:,}".format(course.annual_fees) }}{% else %}N/A{% endif %}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-book fs-2 mb-2 d-block"></i>
+            Course details not available. Check the official website.
+          </div>
+          {% endif %}
+
+          <!-- General Fees Info -->
+          <div class="fees-info-card mt-3">
+            <h6 class="fees-info-title"><i class="bi bi-currency-rupee me-2"></i>Fee Range</h6>
+            <div class="fees-range">{{ college.fees_display() }}</div>
+          </div>
+        </div>
+
+        <!-- ── Placements Tab ── -->
+        <div class="tab-pane fade" id="placements">
+          {% if college.placement_percentage %}
+          <div class="placement-summary mb-4">
+            <div class="placement-donut-wrap">
+              <div class="placement-donut" style="--pct: {{ college.placement_percentage | int }}">
+                <span class="placement-donut-val">{{ college.placement_percentage | int }}%</span>
+                <span class="placement-donut-lbl">Placed</span>
+              </div>
+            </div>
+            <div class="placement-stats-wrap">
+              <div class="placement-stat">
+                <div class="ps-label">Average Package</div>
+                <div class="ps-val text-primary">{{ college.avg_package_lpa or 'N/A' }} LPA</div>
+              </div>
+              <div class="placement-stat">
+                <div class="ps-label">Highest Package</div>
+                <div class="ps-val text-success">{{ college.highest_package_lpa or 'N/A' }} LPA</div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if top_recruiters %}
+          <h6 class="detail-section-title">Top Recruiters</h6>
+          <div class="recruiters-grid">
+            {% for recruiter in top_recruiters %}
+            <div class="recruiter-chip">
+              <i class="bi bi-building me-1"></i>{{ recruiter }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- ── Facilities Tab ── -->
+        <div class="tab-pane fade" id="facilities">
+          <div class="row g-3">
+            <!-- Hostel info -->
+            <div class="col-12">
+              <div class="hostel-info-card {{ 'available' if college.hostel_available else 'unavailable' }}">
+                <i class="bi bi-house-{{ 'check' if college.hostel_available else 'x' }} me-2"></i>
+                {% if college.hostel_available %}
+                  Hostel Available
+                  {% if college.boys_hostel %} · Boys{% endif %}
+                  {% if college.girls_hostel %} · Girls{% endif %}
+                {% else %}
+                  Hostel Not Available / Info Not Found
+                {% endif %}
+              </div>
+            </div>
+
+            {% for facility in college.facilities %}
+            <div class="col-6 col-sm-4 col-md-3">
+              <div class="facility-chip">
+                <i class="bi {{ facility.icon or 'bi-check-circle' }} me-2 text-primary"></i>
+                {{ facility.name }}
+              </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center text-muted py-3">
+              <i class="bi bi-building-gear fs-2 mb-2 d-block"></i>
+              Facility details not available.
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ SIDEBAR ════════════════════════════════════════ -->
+    <div class="col-lg-4">
+
+      <!-- Quick Compare -->
+      <div class="sidebar-card mb-4">
+        <h6 class="sidebar-card-title"><i class="bi bi-layout-split me-2"></i>Quick Actions</h6>
+        {% if current_user.is_authenticated %}
+        <button onclick="toggleFavorite({{ college.id }}, document.getElementById('favBtn'))"
+                id="favBtnSide"
+                class="btn w-100 mb-2 {% if is_favorite %}btn-danger{% else %}btn-outline-danger{% endif %}">
+          <i class="bi bi-heart{% if is_favorite %}-fill{% endif %} me-1"></i>
+          {% if is_favorite %}Saved to Favorites{% else %}Save to Favorites{% endif %}
+        </button>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-danger w-100 mb-2">
+          <i class="bi bi-heart me-1"></i>Login to Save
+        </a>
+        {% endif %}
+        <button onclick="addToCompare({{ college.id }}, '{{ college.name | replace("'", "\\'") }}')"
+                class="btn btn-outline-primary w-100 mb-2">
+          <i class="bi bi-layout-split me-1"></i>Add to Compare
+        </button>
+        {% if college.official_website %}
+        <a href="{{ college.official_website }}" target="_blank" rel="noopener"
+           class="btn btn-primary w-100">
+          <i class="bi bi-globe me-1"></i>Visit Official Website
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Data Source -->
+      <div class="sidebar-card mb-4">
+        <h6 class="sidebar-card-title"><i class="bi bi-database me-2"></i>Data Information</h6>
+        <p class="small text-muted mb-1">
+          Source: <strong>{{ college.data_source or 'NIRF/AICTE' }}</strong>
+        </p>
+        <p class="small text-muted mb-0">
+          Last updated: {{ college.last_updated.strftime('%d %b %Y') if college.last_updated else 'N/A' }}
+        </p>
+      </div>
+
+      <!-- Similar Colleges -->
+      {% if similar %}
+      <div class="sidebar-card">
+        <h6 class="sidebar-card-title"><i class="bi bi-buildings me-2"></i>Similar Colleges</h6>
+        <div class="similar-colleges-list">
+          {% for sc in similar %}
+          <a href="{{ url_for('colleges.detail', college_id=sc.id) }}" class="similar-college-item text-decoration-none">
+            <div class="sc-logo-sm">{{ sc.short_name or sc.name[:2].upper() }}</div>
+            <div class="sc-info">
+              <div class="sc-name">{{ sc.name }}</div>
+              <div class="sc-meta">
+                {% if sc.nirf_rank %}NIRF #{{ sc.nirf_rank }} · {% endif %}
+                {{ sc.college_type or '' }}
+              </div>
+            </div>
+            <i class="bi bi-chevron-right ms-auto text-muted"></i>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Sync both favorite buttons (header + sidebar)
+document.addEventListener('DOMContentLoaded', () => {
+  const favBtn = document.getElementById('favBtn');
+  const favBtnSide = document.getElementById('favBtnSide');
+
+  if (favBtn && favBtnSide) {
+    // Sync clicks between both buttons
+    [favBtn, favBtnSide].forEach(btn => {
+      if (btn) btn.addEventListener('click', () => {
+        const isActive = btn.classList.contains('btn-danger');
+        [favBtn, favBtnSide].forEach(b => {
+          if (!b) return;
+          b.classList.toggle('btn-danger', !isActive);
+          b.classList.toggle('btn-outline-danger', isActive);
+          b.innerHTML = `<i class="bi bi-heart${!isActive ? '-fill' : ''} me-1"></i>${!isActive ? 'Saved' : 'Save'}`;
+        });
+      });
+    });
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+name,short_name,college_type,state,city,address,nirf_rank,nirf_score,nirf_year,naac_grade,annual_fees_min,annual_fees_max,placement_percentage,avg_package_lpa,highest_package_lpa,hostel_available,boys_hostel,girls_hostel,affiliated_university,autonomous,official_website,branches,facilities,top_recruiters,description,total_seats
+
+International Institute of Information Technology Hyderabad,IIIT Hyderabad,Private,Telangana,Hyderabad,Gachibowli Hyderabad,15,74.23,2024,A++,300000,450000,97,28,70,Yes,Yes,Yes,IIIT Hyderabad,Yes,https://www.iiit.ac.in,"CSE,AI,DS,ECE","Research Labs,Hostel,WiFi","Google,Apple,Microsoft","Research focused institute",900
+
+International Institute of Information Technology Bangalore,IIIT Bangalore,Private,Karnataka,Bangalore,Electronic City Bangalore,22,70.11,2024,A++,320000,470000,96,26,65,Yes,Yes,Yes,IIIT Bangalore,Yes,https://www.iiitb.ac.in,"CSE,AI,DS,ECE","Research Labs,Hostel,WiFi","Google,Amazon,Adobe","Top research institute",850
+
+Indraprastha Institute of Information Technology Delhi,IIIT Delhi,Govt,Delhi,New Delhi,Okhla New Delhi,28,68.90,2024,A++,250000,420000,95,24,58,Yes,Yes,Yes,IIIT Delhi,Yes,https://www.iiitd.ac.in,"CSE,AI,DS,ECE","Innovation Labs,Hostel","Microsoft,Google,Meta","Leading Delhi IIIT",950
+
+Indian Institute of Information Technology Allahabad,IIIT Allahabad,Govt,Uttar Pradesh,Prayagraj,Jhalwa Prayagraj,35,66.45,2024,A++,210000,390000,94,20,52,Yes,Yes,Yes,IIIT Allahabad,Yes,https://www.iiita.ac.in,"CSE,IT,ECE","Library,Hostel,Sports","Adobe,Amazon,TCS","Top coding culture institute",1000
+
+Atal Bihari Vajpayee Indian Institute of Information Technology and Management,IIITM Gwalior,Govt,Madhya Pradesh,Gwalior,Gwalior Madhya Pradesh,42,63.88,2024,A+,190000,350000,90,16,40,Yes,Yes,Yes,IIITM Gwalior,Yes,https://www.iiitm.ac.in,"CSE,IT,ME","Library,Hostel,Sports","Infosys,TCS,Wipro","Premier IIITM institute",800
