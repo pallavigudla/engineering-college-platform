@@ -1,48 +1,255 @@
-{% extends "base.html" %}
-{% block title %}My Favorites{% endblock %}
+"""
+app/blueprints/colleges/__init__.py
+"""
 
-{% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-    <div>
-      <h1 class="page-title mb-1">My Favorite Colleges</h1>
-      <p class="text-muted mb-0">{{ favorites | length }} college{{ 's' if favorites | length != 1 }} saved</p>
-    </div>
-    <a href="{{ url_for('colleges.search') }}" class="btn btn-outline-primary btn-sm">
-      <i class="bi bi-search me-1"></i>Find More Colleges
-    </a>
-  </div>
+from flask import Blueprint, render_template, request
+from sqlalchemy import or_
 
-  {% if favorites %}
-  <div class="row g-4">
-    {% set fav_ids = favorites | map(attribute='college_id') | list | set %}
-    {% for fav in favorites %}
-    <div class="col-sm-6 col-lg-4">
-      {% set college = fav.college %}
-      {% include "colleges/_college_card.html" %}
-    </div>
-    {% endfor %}
-  </div>
+from app.models import (
+    College,
+    Branch,
+    State,
+    City
+)
 
-  <!-- Compare Selected Button -->
-  <div id="compareTrayFixed" class="compare-tray-fixed d-none">
-    <div class="container d-flex align-items-center justify-content-between gap-3">
-      <span id="compareTrayLabel" class="text-white fw-semibold">0 colleges selected</span>
-      <a id="compareTrayBtn" href="#" class="btn btn-white btn-sm">
-        <i class="bi bi-layout-split me-1"></i>Compare Now
-      </a>
-    </div>
-  </div>
+from app.utils.forms import CollegeSearchForm
+from flask_login import current_user
 
-  {% else %}
-  <div class="empty-state text-center py-5 my-4">
-    <div class="empty-icon mb-3"><i class="bi bi-heart"></i></div>
-    <h4 class="empty-title">No favorites yet</h4>
-    <p class="empty-desc">Click the <i class="bi bi-heart"></i> icon on any college to save it here.</p>
-    <a href="{{ url_for('colleges.search') }}" class="btn btn-primary mt-3">
-      <i class="bi bi-search me-2"></i>Explore Colleges
-    </a>
-  </div>
-  {% endif %}
-</div>
-{% endblock %}
+colleges_bp = Blueprint(
+    "colleges",
+    __name__,
+    template_folder="../../templates/colleges"
+)
+
+
+# ─────────────────────────────────────────────────────────────
+# BUILD SEARCH QUERY
+# ─────────────────────────────────────────────────────────────
+
+def build_college_query(form):
+
+    query = College.query.filter_by(is_active=True)
+
+    # ── Text Search ────────────────────────────────────────
+    if form.query.data:
+
+        search_term = f"%{form.query.data.strip()}%"
+
+        query = query.filter(
+            or_(
+
+                # College Name
+                College.name.ilike(search_term),
+
+                # Short Name
+                College.short_name.ilike(search_term),
+
+                # City
+                College.city.has(
+                    City.name.ilike(search_term)
+                ),
+
+                # State
+                College.state.has(
+                    State.name.ilike(search_term)
+                ),
+
+                # Branch Name
+                College.branches.any(
+                    Branch.name.ilike(search_term)
+                ),
+
+                # Branch Code
+                College.branches.any(
+                    Branch.code.ilike(search_term)
+                ),
+            )
+        )
+
+    # ── College Type Filter ────────────────────────────────
+    if form.college_type.data:
+
+        query = query.filter(
+            College.college_type == form.college_type.data
+        )
+
+    # ── NIRF Rank Filter ───────────────────────────────────
+    if form.nirf_rank_max.data:
+
+        query = query.filter(
+            College.nirf_rank != None,
+            College.nirf_rank <= form.nirf_rank_max.data
+        )
+
+    # ── Fees Filter ────────────────────────────────────────
+    if form.fees_max.data:
+
+        query = query.filter(
+            or_(
+                College.annual_fees_min <= form.fees_max.data,
+                College.annual_fees_min == None
+            )
+        )
+
+    # ── Placement Filter ───────────────────────────────────
+    if form.placement_min.data:
+
+        query = query.filter(
+            College.placement_percentage != None,
+            College.placement_percentage >= form.placement_min.data
+        )
+
+    # ── Hostel Filter ──────────────────────────────────────
+    if form.hostel.data:
+
+        query = query.filter(
+            College.hostel_available == True
+        )
+
+    # ── State Filter ───────────────────────────────────────
+    if form.state.data and form.state.data.strip():
+
+        query = query.join(State).filter(
+            State.name.ilike(form.state.data)
+        )
+
+    # ── Branch Filter ──────────────────────────────────────
+    if form.branch.data and form.branch.data.strip():
+
+        query = query.join(
+            College.branches
+        ).filter(
+            or_(
+                Branch.name.ilike(f"%{form.branch.data}%"),
+                Branch.code.ilike(f"%{form.branch.data}%")
+            )
+        )
+
+    # ── Sorting ────────────────────────────────────────────
+    sort_column_map = {
+
+        "nirf_rank":
+            College.nirf_rank.asc(),
+
+        "placement_percentage":
+            College.placement_percentage.desc(),
+
+        "annual_fees_min":
+            College.annual_fees_min.asc(),
+
+        "name":
+            College.name.asc(),
+    }
+
+    sort_key = form.sort_by.data or "nirf_rank"
+
+    query = query.order_by(
+        sort_column_map.get(
+            sort_key,
+            College.nirf_rank.asc()
+        )
+    )
+
+    return query
+
+
+# ─────────────────────────────────────────────────────────────
+# SEARCH PAGE
+# ─────────────────────────────────────────────────────────────
+
+@colleges_bp.route("/search")
+def search():
+
+    form = CollegeSearchForm(request.args)
+
+    # ── Dynamic States Dropdown ────────────────────────────
+    states = [("", "All States")]
+
+    all_states = State.query.order_by(State.name).all()
+
+    for state in all_states:
+
+        states.append(
+            (state.name, state.name)
+        )
+
+    # ── Branch Dropdown ────────────────────────────────────
+    branches = [
+
+        ("", "All Branches"),
+
+        ("CSE", "CSE"),
+
+        ("AI", "AI"),
+
+        ("DS", "DS"),
+
+        ("ECE", "ECE"),
+
+        ("EEE", "EEE"),
+
+        ("ME", "ME"),
+
+    ]
+
+    form.state.choices = states
+    form.branch.choices = branches
+
+    page = request.args.get(
+        "page",
+        1,
+        type=int
+    )
+
+    per_page = 12
+
+    # ── Build Query ────────────────────────────────────────
+    college_query = build_college_query(form)
+
+    pagination = college_query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+
+    colleges = pagination.items
+
+    return render_template(
+        "colleges/search.html",
+        form=form,
+        colleges=colleges,
+        pagination=pagination,
+        total=pagination.total,
+        title="Search Colleges",
+    )
+
+
+# ─────────────────────────────────────────────────────────────
+# COLLEGE DETAIL PAGE
+# ─────────────────────────────────────────────────────────────
+
+@colleges_bp.route("/<int:college_id>")
+def detail(college_id):
+
+    college = College.query.filter_by(
+        id=college_id,
+        is_active=True
+    ).first_or_404()
+
+    similar = (
+        College.query
+        .filter(
+            College.id != college.id,
+            College.state == college.state,
+            College.is_active == True
+        )
+        .limit(4)
+        .all()
+    )
+
+    return render_template(
+        "colleges/detail.html",
+        college=college,
+        similar=similar,
+        title=college.name,
+    )

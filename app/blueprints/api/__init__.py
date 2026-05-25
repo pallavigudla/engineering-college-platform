@@ -1,6 +1,6 @@
 """
 app/blueprints/api/__init__.py — REST API v1 Blueprint
-JSON API for search, college details, favorites.
+JSON API for search, college details.
 Future-ready for mobile apps or SPA frontends.
 """
 
@@ -96,10 +96,3 @@ def list_branches():
         "data": [{"id": b.id, "name": b.name, "code": b.code} for b in branches]
     })
 
-
-@api_bp.route("/favorites", methods=["GET"])
-@login_required
-def list_favorites():
-    """GET /api/v1/favorites — Current user's favorites."""
-    favs = Favorite.query.filter_by(user_id=current_user.id).all()
-    return jsonify({"data": [f.college.to_dict() for f in favs]})

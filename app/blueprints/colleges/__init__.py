@@ -38,27 +38,27 @@ def build_college_query(form):
 
         query = query.filter(
             or_(
-                College.name.like(search_term),
-                College.short_name.like(search_term),
+                College.name.ilike(search_term),
+                College.short_name.ilike(search_term),
 
                 # Search by city relationship
                 College.city.has(
-                    City.name.like(search_term)
+                    City.name.ilike(search_term)
                 ),
 
                 # Search by state relationship
                 College.state.has(
-                    State.name.like(search_term)
+                    State.name.ilike(search_term)
                 ),
 
                 # Search by branches relationship
                 College.branches.any(
-                    Branch.name.like(search_term)
+                    Branch.name.ilike(search_term)
                 ),
 
                 # Search by branch codes
                 College.branches.any(
-                    Branch.code.like(search_term)
+                    Branch.code.ilike(search_term)
                 ),
             )
         )
@@ -100,7 +100,7 @@ def build_college_query(form):
     if form.state.data and form.state.data.strip():
 
         query = query.join(State).filter(
-            State.name == form.state.data
+            State.name.ilike(form.state.data)
         )
 
     # ── Branch filter ─────────────────────────────────────
@@ -109,7 +109,7 @@ def build_college_query(form):
         query = query.join(
             College.branches
         ).filter(
-            Branch.name.like(f"%{form.branch.data}%")
+            Branch.name.ilike(f"%{form.branch.data}%")
         )
 
     # ── Sorting ────────────────────────────────────────────

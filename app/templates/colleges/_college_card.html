@@ -1,107 +1,199 @@
 {# 
-  _college_card.html — Reusable College Card Component
-  Variables expected: college (College model), fav_ids (set, optional)
+  _college_card.html — Clean College Card Component
 #}
+
 <div class="college-card h-100" data-college-id="{{ college.id }}">
+
   <!-- Card Header -->
   <div class="college-card-header">
+
     {% if college.nirf_rank %}
     <div class="nirf-badge">
-      <i class="bi bi-trophy-fill me-1"></i>NIRF #{{ college.nirf_rank }}
+      <i class="bi bi-trophy-fill me-1"></i>
+      NIRF #{{ college.nirf_rank }}
     </div>
     {% endif %}
 
-    {% if current_user.is_authenticated %}
-    <button class="fav-btn {% if fav_ids and college.id in fav_ids %}active{% endif %}"
-            onclick="toggleFavorite({{ college.id }}, this)"
-            title="{% if fav_ids and college.id in fav_ids %}Remove from favorites{% else %}Add to favorites{% endif %}">
-      <i class="bi bi-heart{% if fav_ids and college.id in fav_ids %}-fill{% endif %}"></i>
-    </button>
-    {% endif %}
+    <div class="college-type-badge 
+      {{ 'govt' if college.college_type == 'Government' 
+      else 'private' if college.college_type == 'Private' 
+      else 'deemed' }}">
 
-    <div class="college-type-badge {{ 'govt' if college.college_type == 'Government' else 'private' if college.college_type == 'Private' else 'deemed' }}">
       {{ college.college_type or 'N/A' }}
+
     </div>
+
   </div>
 
   <!-- Card Body -->
   <a href="{{ url_for('colleges.detail', college_id=college.id) }}"
      class="college-card-body text-decoration-none">
+
+    <!-- Logo -->
     <div class="college-logo-wrap">
+
       {% if college.logo_url %}
-      <img src="{{ college.logo_url }}" alt="{{ college.name }}" class="college-logo" />
+
+      <img src="{{ college.logo_url }}"
+           alt="{{ college.name }}"
+           class="college-logo" />
+
       {% else %}
+
       <div class="college-logo-placeholder">
+
         {{ college.short_name or college.name[:3].upper() }}
+
       </div>
+
       {% endif %}
+
     </div>
 
-    <h5 class="college-card-name">{{ college.name }}</h5>
+    <!-- College Name -->
+    <h5 class="college-card-name">
 
+      {{ college.name }}
+
+    </h5>
+
+    <!-- Location -->
     <div class="college-card-location">
+
       <i class="bi bi-geo-alt me-1"></i>
-      {{ college.city.name if college.city else '' }}{% if college.city %}, {% endif %}{{ college.state.name if college.state else 'N/A' }}
+
+      {{ college.city.name if college.city else '' }}
+
+      {% if college.city %}, {% endif %}
+
+      {{ college.state.name if college.state else 'N/A' }}
+
     </div>
 
-    <!-- Stats Row -->
+    <!-- Stats -->
     <div class="college-card-stats">
+
+      <!-- Fees -->
       <div class="stat-pill" title="Annual Fees">
+
         <i class="bi bi-currency-rupee"></i>
+
         {% if college.annual_fees_min %}
+
           {{ (college.annual_fees_min / 100000) | round(1) }}L/yr
+
         {% else %}
+
           N/A
+
         {% endif %}
+
       </div>
-      <div class="stat-pill" title="Placement %">
+
+      <!-- Placement -->
+      <div class="stat-pill" title="Placement Percentage">
+
         <i class="bi bi-briefcase"></i>
+
         {% if college.placement_percentage %}
+
           {{ college.placement_percentage | int }}%
+
         {% else %}
+
           N/A
+
         {% endif %}
+
       </div>
-      <div class="stat-pill" title="Avg Package">
+
+      <!-- Package -->
+      <div class="stat-pill" title="Average Package">
+
         <i class="bi bi-graph-up"></i>
+
         {% if college.avg_package_lpa %}
-          {{ college.avg_package_lpa }}LPA
+
+          {{ college.avg_package_lpa }} LPA
+
         {% else %}
+
           N/A
+
         {% endif %}
+
       </div>
+
     </div>
 
-    <!-- Branches preview -->
+    <!-- Branches -->
     {% if college.branches %}
+
     <div class="college-card-branches">
+
       {% for branch in college.branches[:3] %}
-      <span class="branch-tag">{{ branch.code or branch.name[:8] }}</span>
+
+      <span class="branch-tag">
+
+        {{ branch.code or branch.name[:8] }}
+
+      </span>
+
       {% endfor %}
+
       {% if college.branches | length > 3 %}
-      <span class="branch-tag more">+{{ (college.branches | length) - 3 }}</span>
+
+      <span class="branch-tag more">
+
+        +{{ (college.branches | length) - 3 }}
+
+      </span>
+
       {% endif %}
+
     </div>
+
     {% endif %}
 
-    <!-- Hostel indicator -->
+    <!-- Hostel -->
     {% if college.hostel_available %}
+
     <div class="college-hostel-badge">
-      <i class="bi bi-house-check me-1"></i>Hostel Available
+
+      <i class="bi bi-house-check me-1"></i>
+
+      Hostel Available
+
     </div>
+
     {% endif %}
+
   </a>
 
-  <!-- Card Footer -->
+  <!-- Footer -->
   <div class="college-card-footer">
+
     <a href="{{ url_for('colleges.detail', college_id=college.id) }}"
        class="btn btn-view-college">
-      View Details <i class="bi bi-arrow-right ms-1"></i>
+
+      View Details
+
+      <i class="bi bi-arrow-right ms-1"></i>
+
     </a>
-    <button class="btn btn-compare-add"
-            onclick="addToCompare({{ college.id }}, '{{ college.name | replace("'", "\\'") }}')"
-            title="Add to Compare">
-      <i class="bi bi-layout-split"></i>
-    </button>
+
+    {% if college.website_url %}
+
+    <a href="{{ college.website_url }}"
+       target="_blank"
+       class="btn btn-outline-primary">
+
+       Official Site
+
+    </a>
+
+    {% endif %}
+
   </div>
+
 </div>
